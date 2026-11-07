@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Inventario</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo" id="logoEmpresa">&#x1F4E6;</div>
+                    <div class="company-info">
+                        <h1 id="nombreEmpresaHeader">Mi Empresa</h1>
+                        <p>Sistema de Inventario</p>
+                    </div>
+                </div>
+                <div class="stats">
+                    <p>Productos: <strong id="TotalProductos">0</strong></p>
+                    <p>Valor total: $<strong id="ValorTotal">0.00</strong></p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="card">
+        <div class="tabs">
+            <button class="tab-button active" onclick="mostrarTab('productos')" id="tab-productos">
+                &#x1F4E6; Productos
+            </button>
+            <button class="tab-button" onclick="mostrarTab('agregar')" id="tab-agregar">
+                &#x2795; Agregar Producto
+            </button>
+            <button class="tab-button" onclick="mostrarTab('scanner')" id="tab-scanner">
+                &#x1F5A5; Escanear Código
+            </button>
+        </div>
+
+        <div class="tab-content active" id="content-productos">
+            <div class="search-container">
+                <input
+                    type="text"
+                    id="buscarProductos"
+                    placeholder="Buscar producto..."
+                    class="search-input"
+                >
+                <button onclick="buscarProductos()" class="btn btn-primary">
+                    &#x1F50D; Buscar
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProductos">
+                        <!-- Los productos se cargan aquí desde app.js -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-content" id="content-agregar">
+            <h3>Agregar Nuevo Producto</h3>
+            <form id="formProducto" class="product-form">
+                <div class="form-group">
+                    <label class="form-label" for="codigobarras">Código de barras</label>
+                    <input class="form-input" id="codigobarras" name="codigo_barras" type="text"
+                        placeholder="Opcional">
+                    <small class="form-hint">Puedes dejarlo vacío si el producto no tiene código. Al escanear, completa los demás datos y guarda el producto.</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="nombreProducto">Nombre <span class="required-mark">*</span></label>
+                    <input class="form-input" id="nombreProducto" name="nombre" type="text"
+                        placeholder="Ej. Teclado inalámbrico" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="categoriaproducto">Categoría <span class="required-mark">*</span></label>
+                    <select class="form-input" id="categoriaproducto" name="categorias" required>
+                        <option value="" disabled selected>Selecciona una categoría</option>
+                        <option value="Electronicos">Electrónicos</option>
+                        <option value="Ropas">Ropa</option>
+                        <option value="Hogar">Hogar</option>
+                        <option value="Alimentos">Alimentos</option>
+                        <option value="Deportes">Deportes</option>
+                        <option value="Libros">Libros</option>
+                        <option value="Accesorios">Accesorios</option>
+                    </select>
+                </div>
+                <div class="form-group form-group-wide">
+                    <label class="form-label" for="descripcionproducto">Descripción</label>
+                    <textarea class="form-input" id="descripcionproducto" name="descripcion" rows="4"
+                        placeholder="Agrega detalles útiles sobre el producto"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="stockproducto">Stock <span class="required-mark">*</span></label>
+                    <input class="form-input" id="stockproducto" name="stock" type="number"
+                        min="0" step="1" placeholder="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="precioproducto">Precio <span class="required-mark">*</span></label>
+                    <div class="input-with-prefix">
+                        <span aria-hidden="true">$</span>
+                        <input class="form-input" id="precioproducto" name="precio" type="number"
+                            min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="stockminimo">Stock mínimo</label>
+                    <input class="form-input" id="stockminimo" name="stock_minimo" type="number"
+                        min="0" step="1" value="0">
+                    <small class="form-hint">Se marcará como bajo cuando llegue a este nivel.</small>
+                </div>
+
+                <div class="form-actions form-group-wide">
+                    <button class="btn btn-primary" type="submit">Agregar producto</button>
+                    <button class="btn btn-secondary" type="reset">Limpiar</button>
+                    <button class="btn btn-secondary" id="cancelarEdicion" type="button" hidden>Cancelar</button>
+                    <span class="form-required-note"><span class="required-mark">*</span> Campos obligatorios</span>
+                </div>
+            </form>
+        </div>
+        <div class="tab-content" id="content-scanner">
+            <h3>Escanear código</h3>
+            <div class="scanner-container">
+                <div id="lectorQR" class="scanner-box"></div>
+                <p id="mensajeScanner" role="status"></p>
+                <p class="form-hint">La cámara se abrirá al entrar aquí. Si no aparece, permite el acceso cuando el navegador lo solicite.</p>
+                <button class="btn btn-primary" id="iniciarScanner" type="button">Iniciar cámara</button>
+                <button class="btn btn-secondary" id="detenerScanner" type="button">Detener cámara</button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
